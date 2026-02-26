@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EventStatus {
+  OPEN
+  COMPLETE
+  CANCELLED
+  FINISHED
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model User {
+  id           String       @id @default(uuid())
+  name         String
+  email        String       @unique
+  passwordHash String
+  ratingAvg    Float        @default(0)
+  locationLat  Float?
+  locationLng  Float?
+  createdAt    DateTime     @default(now())
+  sports       UserSport[]
+  events       Event[]      @relation("EventCreator")
+  applications EventPlayer[]
+  reviewsGiven Review[]     @relation("Reviewer")
+  reviewsTaken Review[]     @relation("Reviewed")
+}
+
+model Sport {
+  id                String      @id @default(uuid())
+  name              String      @unique
+  minPlayers        Int
+  maxPlayers        Int
+  teamBased         Boolean
+  requiresPositions Boolean
+  users             UserSport[]
+  events            Event[]
+}
+
+model UserSport {
+  id                String  @id @default(uuid())
+  userId            String
+  sportId           String
+  level             Int
+  preferredPosition String?
+  user              User    @relation(fields: [userId], references: [id])
+  sport             Sport   @relation(fields: [sportId], references: [id])
+
+  @@unique([userId, sportId])
+}
+
+model Event {
+  id            String        @id @default(uuid())
+  sportId       String
+  creatorId     String
+  startsAt      DateTime
+  locationLat   Float
+  locationLng   Float
+  address       String
+  totalSlots    Int
+  price         Decimal       @db.Decimal(10, 2)
+  levelRequired Int
+  status        EventStatus   @default(OPEN)
+  sport         Sport         @relation(fields: [sportId], references: [id])
+  creator       User          @relation("EventCreator", fields: [creatorId], references: [id])
+  players       EventPlayer[]
+  reviews       Review[]
+
+  @@index([sportId, startsAt])
+  @@index([locationLat, locationLng])
+}
+
+model EventPlayer {
+  id      String            @id @default(uuid())
+  eventId String
+  userId  String
+  status  ApplicationStatus @default(PENDING)
+  event   Event             @relation(fields: [eventId], references: [id])
+  user    User              @relation(fields: [userId], references: [id])
+
+  @@unique([eventId, userId])
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  reviewerId String
+  reviewedId String
+  eventId    String
+  rating     Int
+  comment    String?
+  reviewer   User     @relation("Reviewer", fields: [reviewerId], references: [id])
+  reviewed   User     @relation("Reviewed", fields: [reviewedId], references: [id])
+  event      Event    @relation(fields: [eventId], references: [id])
+
+  @@unique([reviewerId, reviewedId, eventId])
+}

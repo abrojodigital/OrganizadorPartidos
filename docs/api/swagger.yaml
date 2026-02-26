@@ -1,0 +1,82 @@
+openapi: 3.0.3
+info:
+  title: OrganizadorPartidos API
+  version: 1.0.0
+  description: API REST mobile-first para eventos deportivos multi-deporte.
+servers:
+  - url: https://api.organizadorpartidos.com
+paths:
+  /auth/register:
+    post:
+      summary: Registrar usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Usuario creado
+  /auth/login:
+    post:
+      summary: Iniciar sesión
+      responses:
+        '200':
+          description: Tokens emitidos
+  /sports:
+    get:
+      summary: Listar deportes disponibles
+      responses:
+        '200':
+          description: OK
+  /events:
+    post:
+      summary: Crear evento deportivo
+      responses:
+        '201':
+          description: Evento creado
+    get:
+      summary: Buscar eventos con filtros
+      parameters:
+        - in: query
+          name: sportId
+          schema: { type: string }
+        - in: query
+          name: radiusKm
+          schema: { type: number }
+      responses:
+        '200':
+          description: Lista paginada
+  /events/{eventId}/applications:
+    post:
+      summary: Postularse a evento
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: string }
+      responses:
+        '201':
+          description: Solicitud creada
+  /events/{eventId}/applications/{userId}:
+    patch:
+      summary: Aceptar/Rechazar postulante
+      responses:
+        '200':
+          description: Estado actualizado
+  /reviews:
+    post:
+      summary: Calificar participante
+      responses:
+        '201':
+          description: Review creada
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
