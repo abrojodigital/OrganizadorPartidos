@@ -31,6 +31,20 @@ cd OrganizadorPartidos
 
 > Si ya lo tienes clonado, solo ejecuta `git pull`.
 
+### Opción rápida (todo en un comando)
+
+Si quieres levantar entorno local de una vez (DB + dependencias + prisma + backend + mobile):
+
+```bash
+./scripts/dev-up.sh
+```
+
+Para apagar la base local:
+
+```bash
+./scripts/dev-down.sh
+```
+
 ---
 
 ## 3) Levantar PostgreSQL local
