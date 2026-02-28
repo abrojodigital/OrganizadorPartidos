@@ -2,7 +2,160 @@
 
 Aplicación **mobile-first** para iOS/Android orientada a crear eventos deportivos, encontrar jugadores y completar equipos, inspirada en “Nos Falta Uno”, pero diseñada desde el inicio para múltiples deportes (no solo fútbol).
 
-## Decisiones técnicas asumidas
+## 1) Qué necesitas para implementarlo en tu computadora
+
+Instala estas herramientas antes de arrancar:
+
+- **Node.js 20+** y npm 10+
+- **Docker Desktop** (para PostgreSQL local)
+- **Git**
+- **Expo Go** en tu teléfono (opcional, recomendado para pruebas rápidas)
+- Android Studio (emulador Android) o Xcode (simulador iOS, solo macOS)
+
+Verifica versiones:
+
+```bash
+node -v
+npm -v
+docker -v
+```
+
+---
+
+## 2) Clonar y preparar el repositorio
+
+```bash
+git clone <URL_DE_TU_REPO>
+cd OrganizadorPartidos
+```
+
+> Si ya lo tienes clonado, solo ejecuta `git pull`.
+
+---
+
+## 3) Levantar PostgreSQL local
+
+```bash
+docker compose -f infra/docker-compose.yml up -d
+```
+
+Esto levanta una base local con:
+
+- host: `localhost`
+- puerto: `5432`
+- db: `organizador`
+- user: `organizador`
+- password: `organizador`
+
+Para verificar que está arriba:
+
+```bash
+docker ps
+```
+
+---
+
+## 4) Configurar variables de entorno
+
+### Backend
+
+```bash
+cd apps/backend
+cp .env.example .env
+cd ../..
+```
+
+Archivo base: `apps/backend/.env.example`.
+
+### Mobile
+
+```bash
+cd apps/mobile
+cp .env.example .env
+cd ../..
+```
+
+Archivo base: `apps/mobile/.env.example`.
+
+---
+
+## 5) Inicializar backend
+
+```bash
+cd apps/backend
+npm install
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
+npm run start:dev
+```
+
+Si todo va bien, la API quedará corriendo en `http://localhost:3000`.
+
+---
+
+## 6) Inicializar app mobile (Expo)
+
+En **otra terminal**:
+
+```bash
+cd apps/mobile
+npm install
+npm run start
+```
+
+Se abrirá Expo Dev Tools. Puedes ejecutar en:
+
+- Android emulator
+- iOS simulator (macOS)
+- Expo Go (escaneando QR)
+
+---
+
+## 7) Flujo recomendado para desarrollo diario
+
+1. Levantar DB (`docker compose ... up -d`).
+2. Levantar backend (`npm run start:dev` en `apps/backend`).
+3. Levantar mobile (`npm run start` en `apps/mobile`).
+4. Cuando cambies modelo Prisma, ejecutar:
+
+```bash
+npm run prisma:migrate
+npm run prisma:generate
+```
+
+---
+
+## 8) Qué incluye hoy el scaffold
+
+- Base mobile-first con estructura `apps/mobile` + `apps/backend`.
+- Modelo multideporte (`Sport`, `UserSport`, `Event`, `EventPlayer`, `Review`).
+- Seed con deportes iniciales (fútbol 5/7, básquet, vóley, hockey, handball, rugby reducido, pádel, tenis dobles).
+- Reglas de negocio base de eventos/reviews/chat.
+- Swagger inicial en `docs/api/swagger.yaml`.
+
+---
+
+## 9) Problemas comunes
+
+### Puerto 5432 ocupado
+
+Cambia el puerto en `infra/docker-compose.yml` y actualiza `DATABASE_URL`.
+
+### Prisma no conecta a DB
+
+- Revisa que Docker esté activo.
+- Ejecuta `docker ps` y confirma contenedor `organizador-postgres`.
+- Verifica `DATABASE_URL` en `apps/backend/.env`.
+
+### Expo no conecta con backend
+
+- Verifica `EXPO_PUBLIC_API_BASE_URL` en `apps/mobile/.env`.
+- Si pruebas desde celular físico, usa la IP local de tu PC en vez de `localhost`.
+
+---
+
+## 10) Decisiones técnicas asumidas
 
 - **Frontend mobile**: React Native + Expo + TypeScript.
 - **State management**: Zustand para estado local y TanStack Query para estado remoto.
@@ -14,7 +167,7 @@ Aplicación **mobile-first** para iOS/Android orientada a crear eventos deportiv
 - **Storage**: Cloudinary/S3 (adaptador desacoplado por interfaz).
 - **Arquitectura**: Clean Architecture pragmática (domain/application/infrastructure).
 
-## Estructura del proyecto
+## 11) Estructura del proyecto
 
 ```txt
 apps/
@@ -30,64 +183,14 @@ docs/
   api/swagger.yaml
 ```
 
-## MVP incluido
+## 12) Deploy (resumen)
 
-- Autenticación (registro/login/refresh/perfil).
-- Gestión multi-deporte (`Sport`, `UserSport`) con seeds iniciales.
-- Creación de eventos deportivos (`Event`) validando límites de jugadores por deporte.
-- Postulación (`EventPlayer`) con reglas de negocio base.
-- Chat por evento (gateway + contrato de autorización por participación).
-- Reputación (`Review`) y cálculo de promedio.
-
-## Reglas de negocio implementadas (base)
-
-1. Un usuario no puede postularse dos veces al mismo evento.
-2. Solo el creador puede aceptar/rechazar postulaciones.
-3. El evento pasa a `COMPLETE` al llenarse.
-4. Solo participantes confirmados pueden dejar calificación.
-5. Un evento cancelado dispara notificación push a participantes.
-6. `totalSlots` debe respetar `minPlayers`/`maxPlayers` del deporte.
-
-## Configuración rápida
-
-1. Levantar PostgreSQL local:
-
-```bash
-docker compose -f infra/docker-compose.yml up -d
-```
-
-2. Backend:
-
-```bash
-cd apps/backend
-npm install
-npm run prisma:generate
-npm run prisma:migrate
-npm run prisma:seed
-npm run start:dev
-```
-
-3. Mobile:
-
-```bash
-cd apps/mobile
-npm install
-npm run start
-```
-
-## Deploy
-
-- Backend: Railway/Render/AWS ECS.
+- Backend: Railway / Render / AWS ECS.
 - DB: PostgreSQL administrado.
 - Mobile: EAS Build + stores.
 - Variables sensibles: secrets manager.
 
-## Tests
-
-- Backend: unit tests de servicios de reglas de negocio.
-- Mobile: test básico de render de Home.
-
-## Próximos pasos
+## 13) Próximos pasos
 
 - Offline-first avanzado con cola de mutaciones.
 - Pagos (MercadoPago/Stripe).
