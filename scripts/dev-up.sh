@@ -25,7 +25,7 @@ if ! docker info >/dev/null 2>&1; then
 fi
 
 log "Levantando PostgreSQL con Docker..."
-docker compose -f "$ROOT_DIR/infra/docker-compose.yml" up -d
+docker compose -f "$ROOT_DIR/infra/docker-compose.yml" up -d db
 
 if [[ ! -f "$BACKEND_DIR/.env" ]]; then
   log "Creando apps/backend/.env desde .env.example"
@@ -40,8 +40,8 @@ fi
 log "Instalando dependencias de backend..."
 (cd "$BACKEND_DIR" && npm install)
 
-log "Preparando Prisma (generate, migrate, seed)..."
-(cd "$BACKEND_DIR" && npm run prisma:generate && npm run prisma:migrate && npm run prisma:seed)
+log "Preparando Prisma (generate, push, seed)..."
+(cd "$BACKEND_DIR" && npm run prisma:generate && npm run prisma:push && npm run prisma:seed)
 
 log "Instalando dependencias mobile..."
 (cd "$MOBILE_DIR" && npm install)

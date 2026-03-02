@@ -1,4 +1,4 @@
-import { EventsService } from '../src/modules/events/events.service';
+const { EventsService } = require('../src/modules/events/events.service');
 
 describe('EventsService business rules', () => {
   const service = new EventsService();

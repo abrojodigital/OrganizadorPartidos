@@ -1,14 +1,16 @@
-export class ReviewsService {
-  ensureParticipant(isParticipant: boolean): void {
+class ReviewsService {
+  ensureParticipant(isParticipant) {
     if (!isParticipant) {
-      throw new Error('Only confirmed participants can leave a review');
+      throw new Error('Only confirmed participants');
     }
   }
 
-  calculateAverage(ratings: number[]): number {
+  calculateAverage(ratings) {
     if (!ratings.length) return 0;
 
     const total = ratings.reduce((acc, rating) => acc + rating, 0);
     return Number((total / ratings.length).toFixed(2));
   }
 }
+
+module.exports = { ReviewsService };

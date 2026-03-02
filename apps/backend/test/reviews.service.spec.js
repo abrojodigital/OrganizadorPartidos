@@ -1,4 +1,4 @@
-import { ReviewsService } from '../src/modules/reviews/reviews.service';
+const { ReviewsService } = require('../src/modules/reviews/reviews.service');
 
 describe('ReviewsService', () => {
   const service = new ReviewsService();
