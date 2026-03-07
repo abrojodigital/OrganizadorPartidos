@@ -1,0 +1,24 @@
+{
+  "name": "organizador-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node src/main.js",
+    "start:dev": "node --watch src/main.js",
+    "test": "jest",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "prisma:seed": "node prisma/seed.js",
+    "docker:start": "npm run prisma:generate && npm run prisma:push && npm run prisma:seed && npm run start",
+    "prestart": "prisma generate",
+    "prestart:dev": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "prisma": "^5.20.0"
+  }
+}
